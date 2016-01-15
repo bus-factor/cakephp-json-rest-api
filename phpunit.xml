@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    colors="true"
+    processIsolation="false"
+    stopOnFailure="false"
+    syntaxCheck="true"
+    bootstrap="tests/bootstrap.php"
+    printerFile="vendor/bus-factor/phpunit-result-printer/src/ResultPrinter.php"
+    printerClass="PhpunitResultPrinter\ResultPrinter"
+    >
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <ini name="apc.enable_cli" value="1"/>
+    </php>
+
+    <logging>
+        <log type="coverage-html" target=".coverage" lowUpperBound="80" highLowerBound="90" />
+    </logging>
+
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <listeners>
+        <listener
+        class="\Cake\TestSuite\Fixture\FixtureInjector"
+        file="vendor/cakephp/cakephp/src/TestSuite/Fixture/FixtureInjector.php">
+            <arguments>
+                <object class="\Cake\TestSuite\Fixture\FixtureManager" />
+            </arguments>
+        </listener>
+    </listeners>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+
+            <exclude>
+                <directory suffix=".php">config</directory>
+                <directory suffix=".php">tests</directory>
+                <directory suffix=".php">vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+</phpunit>

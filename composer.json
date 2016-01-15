@@ -1,0 +1,24 @@
+{
+    "name": "bus-factor/cakephp-json-rest-api",
+    "description": "JSON REST API plugin for CakePHP",
+    "type": "cakephp-plugin",
+    "require": {
+        "php": ">=5.4.16",
+        "cakephp/cakephp": "~3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "bus-factor/phpunit-result-printer": "^0.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JsonRestApi\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JsonRestApi\\Test\\": "tests",
+            "Cake\\Test\\": "vendor/cakephp/cakephp/tests"
+        }
+    }
+}
