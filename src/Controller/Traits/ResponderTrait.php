@@ -9,7 +9,7 @@ namespace JsonRestApi\Controller\Traits;
 use Cake\Utility\Hash;
 
 /**
- * ResponderTrait feature for controllers.
+ * Responder trait for controllers.
  *
  * @author Michael Leßnau <michael.lessnau@gmail.com>
  */
