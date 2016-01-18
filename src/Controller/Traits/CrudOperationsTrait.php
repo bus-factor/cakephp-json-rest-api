@@ -4,9 +4,7 @@
 // date:   2016-01-16
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Controller\Traits;
-
-use Cake\Network\Exception\NotFoundException;
+namespace Jra\Controller\Traits;
 
 /**
  * CRUD operations trait for controllers.
@@ -15,6 +13,7 @@ use Cake\Network\Exception\NotFoundException;
  */
 trait CrudOperationsTrait
 {
+    use CrudOperationHooksTrait;
     use ResourcesTrait;
     use ResponderTrait;
 
@@ -25,13 +24,16 @@ trait CrudOperationsTrait
      */
     public function create()
     {
-        $resource = $this->newResource($this->request->data);
+        $inaccessibleFields = $this->getResourcesSecureScope();
+        $resource = $this->newResource($this->request->data, $inaccessibleFields);
 
         if (!empty($resource->errors())) {
             return $this->respondWith($resource->errors(), ['code' => 400]);
         }
 
+        $this->beforeCreate($resource);
         $this->saveResource($resource);
+        $this->afterCreate($resource);
 
         return $this->respondWith($resource);
     }
@@ -49,7 +51,9 @@ trait CrudOperationsTrait
     {
         $resource = $this->findResourceOrThrowNotFoundException($id);
 
+        $this->beforeDelete($resource);
         $this->deleteResource($resource);
+        $this->afterDelete($resource);
 
         return $this->respondWith(null);
     }
@@ -85,7 +89,9 @@ trait CrudOperationsTrait
             return $this->respondWith($resource->errors(), ['code' => 400]);
         }
 
+        $this->beforeUpdate($resource);
         $this->saveResource($resource);
+        $this->afterUpdate($resource);
 
         return $this->respondWith($resource);
     }

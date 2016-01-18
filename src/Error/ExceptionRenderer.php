@@ -4,11 +4,11 @@
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Error;
+namespace Jra\Error;
 
 use Cake\Error\ExceptionRenderer as ExceptionRendererBase;
 use Cake\Network\Response;
-use JsonRestApi\Controller\ErrorController;
+use Jra\Controller\ErrorController;
 
 /**
  * Exception renderer class.
@@ -20,12 +20,10 @@ class ExceptionRenderer extends ExceptionRendererBase
     /**
      * Returns the error controller instance.
      *
-     * @return JsonRestApi\Controller\ErrorController
+     * @return Jra\Controller\ErrorController
      */
     protected function _getController()
     {
-        $response = new Response();
-
-        return new ErrorController(null, $response);
+        return new ErrorController(null, new Response());
     }
 }

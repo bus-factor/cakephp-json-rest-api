@@ -4,7 +4,7 @@
 // date:   2016-01-15
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Controller\Traits;
+namespace Jra\Controller\Traits;
 
 use Cake\Network\Exception\NotFoundException;
 use Cake\ORM\Entity;
@@ -15,10 +15,21 @@ use RuntimeException;
 /**
  * Resources trait for controllers.
  *
+ * This trait requires the following JSON REST API options:
+ *
+ *      public $jraOptions = [
+ *          'secure' => [
+ *              'user_id' => 'getCurrentUserId'
+ *          ],
+ *          'table' => 'Users'
+ *      ];
+ *
  * @author Michael Leßnau <michael.lessnau@gmail.com>
  */
 trait ResourcesTrait
 {
+    use OptionsTrait;
+
     /**
      * Deletes a resource.
      *
@@ -26,7 +37,7 @@ trait ResourcesTrait
      *
      * @return bool
      */
-    public function deleteResource(Entity $resource)
+    public function deleteResource(Entity &$resource)
     {
         return $this->getResourcesTable()->delete($resource);
     }
@@ -42,7 +53,7 @@ trait ResourcesTrait
     {
         $pk = $this->getResourcesTable()->primaryKey();
 
-        return $this->getResourcesTableQuery()->where([$pk => $pkValue])->first();
+        return $this->getResourcesQuery()->where([$pk => $pkValue])->first();
     }
 
     /**
@@ -72,26 +83,27 @@ trait ResourcesTrait
      */
     public function findResources()
     {
-        return $this->getResourcesTableQuery()->toArray();
+        return $this->getResourcesQuery()->toArray();
     }
 
     /**
-     * Returns a resources option.
+     * Returns the resources secured scope.
      *
-     * @param mixed $path
-     * @param mixed $defaultValue
-     *
-     * @return mixed
-     *
-     * @throws RuntimeException
+     * @return array
      */
-    public function getResourcesOption($path, $defaultValue = null)
+    public function getResourcesSecureScope()
     {
-        if (!isset($this->resourcesOptions)) {
-            throw new RuntimeException('No $resourcesOptions defined');
+        if (!$this->hasJraOption('secure')) {
+            return [];
         }
 
-        return Hash::get($this->resourcesOptions, $path, $defaultValue);
+        $scope = $this->getJraOption('secure');
+
+        foreach ($scope as $column => &$method) {
+            $method = $this->{$method}();
+        }
+
+        return $scope;
     }
 
     /**
@@ -101,13 +113,17 @@ trait ResourcesTrait
      */
     public function &getResourcesTable()
     {
-        $resourcesName = $this->getResourcesOption('name');
-
-        if (!isset($this->{$resourcesName})) {
-            $this->{$resourcesName} = TableRegistry::get($resourcesName);
+        if (!$this->hasJraOption('table')) {
+            $this->setJraOption('table', $this->modelClass);
         }
 
-        return $this->{$resourcesName};
+        $table = $this->getJraOption('table');
+
+        if (!isset($this->{$table})) {
+            $this->loadModel($table);
+        }
+
+        return $this->{$table};
     }
 
     /**
@@ -115,9 +131,12 @@ trait ResourcesTrait
      *
      * @return Cake\ORM\Query
      */
-    public function getResourcesTableQuery()
+    public function getResourcesQuery()
     {
-        return $this->getResourcesTable()->find('all');
+        $query = $this->getResourcesTable()->find('all');
+        $scope = $this->getResourcesSecureScope();
+
+        return empty($scope) ? $query : $query->where($scope);
     }
 
     /**
@@ -148,7 +167,7 @@ trait ResourcesTrait
      *
      * @return Cake\ORM\Entity
      */
-    public function patchResource(Entity $resource, array $accessibleFields)
+    public function patchResource(Entity &$resource, array $accessibleFields)
     {
         $this->getResourcesTable()->patchEntity($resource, $accessibleFields, ['validate' => false]);
         $this->validateResource($resource);
@@ -163,7 +182,7 @@ trait ResourcesTrait
      *
      * @return Cake\ORM\Entity|bool
      */
-    public function saveResource(Entity $resource)
+    public function saveResource(Entity &$resource)
     {
         return $this->getResourcesTable()->save($resource);
     }
@@ -175,7 +194,7 @@ trait ResourcesTrait
      *
      * @return array
      */
-    public function validateResource(Entity $resource)
+    public function validateResource(Entity &$resource)
     {
         $errors = $this->getResourcesTable()->validator('default')->errors($resource->toArray());
 

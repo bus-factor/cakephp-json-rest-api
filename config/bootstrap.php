@@ -7,7 +7,7 @@
 use Cake\Core\Configure;
 use Cake\Error\ErrorHandler;
 
-Configure::write('Error.exceptionRenderer', 'JsonRestApi\Error\ExceptionRenderer');
+Configure::write('Error.exceptionRenderer', 'Jra\Error\ExceptionRenderer');
 
 if (PHP_SAPI !== 'cli') {
     (new ErrorHandler(Configure::read('Error')))->register();

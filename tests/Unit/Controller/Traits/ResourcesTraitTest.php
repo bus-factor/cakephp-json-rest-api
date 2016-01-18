@@ -4,13 +4,13 @@
 // date:   2016-01-15
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Test\Unit\Controller\Traits;
+namespace Jra\Test\Unit\Controller\Traits;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\Entity;
 use Cake\ORM\Query;
 use Cake\ORM\Table;
-use JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait;
+use Jra\Test\Dummy\Controller\ControllerWithResourcesTrait;
 use PHPUnit_Framework_TestCase;
 
 class ResourcesTraitTest extends PHPUnit_Framework_TestCase
@@ -23,7 +23,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $table = $this->getMock('Cake\ORM\Table', ['delete']);
         $table->expects($this->once())->method('delete')->with($resource)->will($this->returnValue($retVal));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
 
         $this->assertSame($retVal, $controller->deleteResource($resource));
@@ -45,9 +45,9 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $query->expects($this->once())->method('where')->with([$pk => $pkValue])->will($this->returnValue($query));
         $query->expects($this->once())->method('first')->will($this->returnValue($resource));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'getResourcesTableQuery']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'getResourcesQuery']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
-        $controller->expects($this->once())->method('getResourcesTableQuery')->will($this->returnValue($query));
+        $controller->expects($this->once())->method('getResourcesQuery')->will($this->returnValue($query));
 
         $this->assertSame($resource, $controller->findResource($pkValue));
     }
@@ -63,53 +63,25 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $query = $this->getMock('Cake\ORM\Query', ['toArray'], [null, $table]);
         $query->expects($this->once())->method('toArray')->will($this->returnValue($resources));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTableQuery']);
-        $controller->expects($this->once())->method('getResourcesTableQuery')->will($this->returnValue($query));
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesQuery']);
+        $controller->expects($this->once())->method('getResourcesQuery')->will($this->returnValue($query));
 
         $this->assertSame($resources, $controller->findResources());
     }
 
     /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage No $resourcesOptions defined
-     */
-    public function testGetResourcesOptionsToHandleMissingOptionsDefinition()
-    {
-        $controller = new ControllerWithResourcesTrait(null, null);
-        unset($controller->resourcesOptions);
-
-        $controller->getResourcesOption('name');
-    }
-
-    public function testGetResourcesOptionToReturnDefaultValue()
-    {
-        $defaultValue = 'fallback value';
-        $controller = new ControllerWithResourcesTrait(null, null);
-
-        $this->assertSame($defaultValue, $controller->getResourcesOption('foo', $defaultValue));
-    }
-
-    public function testGetResourcesOptionToReturnActualValue()
-    {
-        $defaultValue = 'fallback value';
-        $controller = new ControllerWithResourcesTrait(null, null);
-
-        $this->assertSame($controller->resourcesOptions['name'], $controller->getResourcesOption('name', $defaultValue));
-    }
-
-    /**
      * @dataProvider provideTestGetResourcesTableData
      *
-     * @param string $resourcesName
+     * @param string $table
      */
-    public function testGetResourcesTable($resourcesName)
+    public function testGetResourcesTable($table)
     {
         $controller = new ControllerWithResourcesTrait(null, null);
-        $controller->resourcesOptions['name'] = $resourcesName;
-        $table = $controller->getResourcesTable();
+        $controller->setJraOption('table', $table);
+        $tableInstance = $controller->getResourcesTable();
 
-        $this->assertInstanceOf('Cake\ORM\Table', $table);
-        $this->assertSame($resourcesName, $table->alias());
+        $this->assertInstanceOf('Cake\ORM\Table', $tableInstance);
+        $this->assertSame($table, $tableInstance->alias());
     }
 
     public function provideTestGetResourcesTableData()
@@ -120,7 +92,20 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testGetResourcesTableQuery()
+    public function testGetResourcesTableWhenNoOptionProvided()
+    {
+        $controller = new ControllerWithResourcesTrait(null, null);
+        $controller->modelClass = 'Messages';
+        unset($controller->jraOptions);
+
+        $tableInstance = $controller->getResourcesTable();
+
+        $this->assertInstanceOf('Cake\ORM\Table', $tableInstance);
+        $this->assertSame('Messages', $tableInstance->alias());
+        $this->assertSame('Messages', $controller->getJraOption('table'));
+    }
+
+    public function testGetResourcesQuery()
     {
         $connection = ConnectionManager::get('test');
         $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string']];
@@ -131,10 +116,29 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
 
         $table->expects($this->once())->method('find')->with('all')->will($this->returnValue($query));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller->setJraOption('secure', []);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
 
-        $this->assertSame($query, $controller->getResourcesTableQuery());
+        $this->assertSame($query, $controller->getResourcesQuery());
+    }
+
+    public function testGetResourcesQueryToRespectSecureScope()
+    {
+        $connection = ConnectionManager::get('test');
+        $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string'], 'business_id' => ['type' => 'integer']];
+
+        $table = $this->getMock('Cake\ORM\Table', ['find'], [['table' => 'users', 'connection' => $connection, 'schema' => $schema]]);
+
+        $query = $this->getMock('Cake\ORM\Query', ['where'], [null, $table]);
+        $query->expects($this->once())->method('where')->with(['business_id' => 1337])->will($this->returnValue($query));
+
+        $table->expects($this->once())->method('find')->with('all')->will($this->returnValue($query));
+
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
+
+        $this->assertSame($query, $controller->getResourcesQuery());
     }
 
     public function testNewResource()
@@ -148,7 +152,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $table = $this->getMock('Cake\ORM\Table', ['newEntity']);
         $table->expects($this->once())->method('newEntity')->with($accessibleFields)->will($this->returnValue($resource));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
         $controller->expects($this->once())->method('validateResource')->with($resource);
 
@@ -164,7 +168,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $table = $this->getMock('Cake\ORM\Table', ['patchEntity']);
         $table->expects($this->once())->method('patchEntity')->with($resource, $accessibleFields, $options)->will($this->returnValue($resource));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
         $controller->expects($this->once())->method('validateResource')->with($resource);
 
@@ -178,7 +182,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $table = $this->getMock('Cake\ORM\Table', ['save']);
         $table->expects($this->once())->method('save')->with($resource)->will($this->returnValue($resource));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
 
         $this->assertSame($resource, $controller->saveResource($resource));
@@ -199,7 +203,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $table = $this->getMock('Cake\ORM\Table', ['validator']);
         $table->expects($this->once())->method('validator')->with('default')->will($this->returnValue($validator));
 
-        $controller = $this->getMock('JsonRestApi\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
 
         $this->assertEquals($errors, $controller->validateResource($resource));

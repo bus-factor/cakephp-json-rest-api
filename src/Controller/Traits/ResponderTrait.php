@@ -4,7 +4,7 @@
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Controller\Traits;
+namespace Jra\Controller\Traits;
 
 use Cake\Utility\Hash;
 
@@ -19,20 +19,21 @@ trait ResponderTrait
      * Responds with JSON formatted data.
      *
      * @param mixed $data
-     * @param array $options
+     * @param array $options Valid keys are 'code' and 'message'.
      *
      * @return Cake\Network\Response
      */
     public function respondWith($data, array $options = [])
     {
-        $message = Hash::get($options, 'message', null);
         $code = Hash::get($options, 'code', 200);
         $status = ($code < 400) ? 'success' : 'failure';
+        $message = Hash::get($options, 'message', null);
+        $dataField = ($status === 'success') ? 'data' : 'errors';
 
         $json = json_encode([
             'status' => $status,
             'code' => $code,
-            ($status === 'success' ? 'data' : 'errors') => $data,
+            $dataField => $data,
             'message' => $message
         ]);
 

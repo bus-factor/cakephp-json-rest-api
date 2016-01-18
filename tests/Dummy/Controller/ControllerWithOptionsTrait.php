@@ -1,17 +1,17 @@
 <?php
 
-// file:   ControllerWithCrudOperationsTrait.php
-// date:   2016-01-16
+// file:   ControllerWithOptionsTrait.php
+// date:   2016-01-17
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
 namespace Jra\Test\Dummy\Controller;
 
 use Cake\Controller\Controller;
-use Jra\Controller\Traits\CrudOperationsTrait;
+use Jra\Controller\Traits\OptionsTrait;
 
-class ControllerWithCrudOperationsTrait extends Controller
+class ControllerWithOptionsTrait extends Controller
 {
-    use CrudOperationsTrait;
+    use OptionsTrait;
 
     /**
      * JSON REST API options.
@@ -19,6 +19,6 @@ class ControllerWithCrudOperationsTrait extends Controller
      * @var array
      */
     public $jraOptions = [
-        'table' => 'Users'
+        'name' => 'Foo'
     ];
 }

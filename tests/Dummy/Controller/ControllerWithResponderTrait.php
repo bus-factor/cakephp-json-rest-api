@@ -4,10 +4,10 @@
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Test\Dummy\Controller;
+namespace Jra\Test\Dummy\Controller;
 
 use Cake\Controller\Controller;
-use JsonRestApi\Controller\Traits\ResponderTrait;
+use Jra\Controller\Traits\ResponderTrait;
 
 class ControllerWithResponderTrait extends Controller
 {

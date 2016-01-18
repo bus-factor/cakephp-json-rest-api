@@ -4,12 +4,12 @@
 // date:   2016-01-13
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Test\Unit\Controller;
+namespace Jra\Test\Unit\Controller;
 
 use Cake\Event\Event;
 use Cake\Network\Response;
 use Exception;
-use JsonRestApi\Controller\ErrorController;
+use Jra\Controller\ErrorController;
 use PHPUnit_Framework_TestCase;
 
 class ErrorControllerTest extends PHPUnit_Framework_TestCase
@@ -31,7 +31,7 @@ class ErrorControllerTest extends PHPUnit_Framework_TestCase
 
         $response = new Response();
 
-        $errorController = $this->getMock('JsonRestApi\Controller\ErrorController', ['respondWith']);
+        $errorController = $this->getMock('Jra\Controller\ErrorController', ['respondWith']);
         $errorController->expects($this->once())->method('respondWith')->with(null, $options)->will($this->returnValue($response));
 
         $errorController->viewVars = [

@@ -12,12 +12,12 @@
     },
     "autoload": {
         "psr-4": {
-            "JsonRestApi\\": "src"
+            "Jra\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "JsonRestApi\\Test\\": "tests",
+            "Jra\\Test\\": "tests",
             "Cake\\Test\\": "vendor/cakephp/cakephp/tests"
         }
     }

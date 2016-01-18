@@ -4,10 +4,10 @@
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Test\Unit\Controller\Traits;
+namespace Jra\Test\Unit\Controller\Traits;
 
 use Cake\Utility\Hash;
-use JsonRestApi\Test\Dummy\Controller\ControllerWithResponderTrait;
+use Jra\Test\Dummy\Controller\ControllerWithResponderTrait;
 use PHPUnit_Framework_TestCase;
 
 class ResponderTraitTest extends PHPUnit_Framework_TestCase

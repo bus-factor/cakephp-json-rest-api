@@ -4,21 +4,34 @@
 // date:   2016-01-15
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Test\Dummy\Controller;
+namespace Jra\Test\Dummy\Controller;
 
 use Cake\Controller\Controller;
-use JsonRestApi\Controller\Traits\ResourcesTrait;
+use Jra\Controller\Traits\ResourcesTrait;
 
 class ControllerWithResourcesTrait extends Controller
 {
     use ResourcesTrait;
 
     /**
-     * Resources trait options.
+     * JSON REST API options.
      *
      * @var array
      */
-    public $resourcesOptions = [
-        'name' => 'Users'
+    public $jraOptions = [
+        'secure' => [
+            'business_id' => 'getCurrentBusinessId'
+        ],
+        'table' => 'Users'
     ];
+
+    /**
+     * Returns the current business ID.
+     *
+     * @return int
+     */
+    public function getCurrentBusinessId()
+    {
+        return 1337;
+    }
 }

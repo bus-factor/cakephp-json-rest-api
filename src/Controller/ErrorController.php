@@ -4,11 +4,11 @@
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
-namespace JsonRestApi\Controller;
+namespace Jra\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\Event;
-use JsonRestApi\Controller\Traits\ResponderTrait;
+use Jra\Controller\Traits\ResponderTrait;
 
 /**
  * Error controller class.
