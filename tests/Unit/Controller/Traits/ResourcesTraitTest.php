@@ -20,7 +20,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $resource = new Entity();
         $retVal = 'uargh';
 
-        $table = $this->getMock('Cake\ORM\Table', ['delete']);
+        $table = $this->getTableMock(['delete']);
         $table->expects($this->once())->method('delete')->with($resource)->will($this->returnValue($retVal));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
@@ -35,10 +35,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $pkValue = 'bar';
         $resource = new Entity();
 
-        $connection = ConnectionManager::get('test');
-        $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string']];
-
-        $table = $this->getMock('Cake\ORM\Table', ['primaryKey'], [['table' => 'users', 'connection' => $connection, 'schema' => $schema]]);
+        $table = $this->getTableMock(['primaryKey']);
         $table->expects($this->once())->method('primaryKey')->will($this->returnValue($pk));
 
         $query = $this->getMock('Cake\ORM\Query', ['where', 'first'], [null, $table]);
@@ -55,10 +52,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
     public function testFindResources()
     {
         $resources = [new Entity(), new Entity()];
-        $connection = ConnectionManager::get('test');
-        $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string']];
-
-        $table = new Table(['table' => 'users', 'connection' => $connection, 'schema' => $schema]);
+        $table = $this->getTableMock();
 
         $query = $this->getMock('Cake\ORM\Query', ['toArray'], [null, $table]);
         $query->expects($this->once())->method('toArray')->will($this->returnValue($resources));
@@ -107,10 +101,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
 
     public function testGetResourcesQuery()
     {
-        $connection = ConnectionManager::get('test');
-        $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string']];
-
-        $table = $this->getMock('Cake\ORM\Table', ['find'], [['table' => 'users', 'connection' => $connection, 'schema' => $schema]]);
+        $table = $this->getTableMock(['find']);
 
         $query = new Query(null, $table);
 
@@ -125,10 +116,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
 
     public function testGetResourcesQueryToRespectSecureScope()
     {
-        $connection = ConnectionManager::get('test');
-        $schema = ['id' => ['type' => 'integer'], 'email' => ['type' => 'string'], 'business_id' => ['type' => 'integer']];
-
-        $table = $this->getMock('Cake\ORM\Table', ['find'], [['table' => 'users', 'connection' => $connection, 'schema' => $schema]]);
+        $table = $this->getTableMock(['find']);
 
         $query = $this->getMock('Cake\ORM\Query', ['where'], [null, $table]);
         $query->expects($this->once())->method('where')->with(['business_id' => 1337])->will($this->returnValue($query));
@@ -149,7 +137,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $resource->foo = 'bar';
         $resource->fiz = 'baz';
 
-        $table = $this->getMock('Cake\ORM\Table', ['newEntity']);
+        $table = $this->getTableMock(['newEntity']);
         $table->expects($this->once())->method('newEntity')->with($accessibleFields)->will($this->returnValue($resource));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
@@ -165,7 +153,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $accessibleFields = ['foo' => 'bar'];
         $options = ['validate' => false];
 
-        $table = $this->getMock('Cake\ORM\Table', ['patchEntity']);
+        $table = $this->getTableMock(['patchEntity']);
         $table->expects($this->once())->method('patchEntity')->with($resource, $accessibleFields, $options)->will($this->returnValue($resource));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable', 'validateResource']);
@@ -179,7 +167,7 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
     {
         $resource = new Entity();
 
-        $table = $this->getMock('Cake\ORM\Table', ['save']);
+        $table = $this->getTableMock(['save']);
         $table->expects($this->once())->method('save')->with($resource)->will($this->returnValue($resource));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
@@ -200,12 +188,35 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $validator = $this->getMock('Cake\Validation\Validator', ['errors']);
         $validator->expects($this->once())->method('errors')->with($resourceAsArray)->will($this->returnValue($errors));
 
-        $table = $this->getMock('Cake\ORM\Table', ['validator']);
+        $table = $this->getTableMock(['validator']);
         $table->expects($this->once())->method('validator')->with('default')->will($this->returnValue($validator));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
         $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
 
         $this->assertEquals($errors, $controller->validateResource($resource));
+    }
+
+    protected function getTableMock(array $methods = [])
+    {
+        $connection = ConnectionManager::get('test');
+
+        $schema = [
+            'id' => ['type' => 'integer'],
+            'email' => ['type' => 'string'],
+            'business_id' => ['type' => 'integer']
+        ];
+
+        $options = [
+            'table' => 'users',
+            'connection' => $connection,
+            'schema' => $schema
+        ];
+
+        if (empty($methods)) {
+            return new Table($options);
+        }
+
+        return $this->getMock('Cake\ORM\Table', $methods, [$options]);
     }
 }
