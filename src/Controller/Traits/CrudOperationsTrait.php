@@ -15,7 +15,7 @@ trait CrudOperationsTrait
 {
     use CrudOperationHooksTrait;
     use ResourcesTrait;
-    use ResponderTrait;
+    use JsonResponderTrait;
 
     /**
      * Creates a new resource.
@@ -28,14 +28,14 @@ trait CrudOperationsTrait
         $resource = $this->newResource($this->request->data, $inaccessibleFields);
 
         if (!empty($resource->errors())) {
-            return $this->respondWith($resource->errors(), ['code' => 400]);
+            return $this->respondWithJson($resource->errors(), ['code' => 400]);
         }
 
         $this->beforeCreate($resource);
         $this->saveResource($resource);
         $this->afterCreate($resource);
 
-        return $this->respondWith($resource);
+        return $this->respondWithJson($resource);
     }
 
     /**
@@ -55,7 +55,7 @@ trait CrudOperationsTrait
         $this->deleteResource($resource);
         $this->afterDelete($resource);
 
-        return $this->respondWith(null);
+        return $this->respondWithJson(null);
     }
 
     /**
@@ -67,7 +67,7 @@ trait CrudOperationsTrait
     {
         $resources = $this->findResources();
 
-        return $this->respondWith($resources);
+        return $this->respondWithJson($resources);
     }
 
     /**
@@ -86,14 +86,14 @@ trait CrudOperationsTrait
         $this->patchResource($resource, $this->request->data);
 
         if (!empty($resource->errors())) {
-            return $this->respondWith($resource->errors(), ['code' => 400]);
+            return $this->respondWithJson($resource->errors(), ['code' => 400]);
         }
 
         $this->beforeUpdate($resource);
         $this->saveResource($resource);
         $this->afterUpdate($resource);
 
-        return $this->respondWith($resource);
+        return $this->respondWithJson($resource);
     }
 
     /**
@@ -109,6 +109,6 @@ trait CrudOperationsTrait
     {
         $resource = $this->findResourceOrThrowNotFoundException($id);
 
-        return $this->respondWith($resource);
+        return $this->respondWithJson($resource);
     }
 }

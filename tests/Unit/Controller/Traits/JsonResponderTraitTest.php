@@ -1,16 +1,16 @@
 <?php
 
-// file:   ResponderTraitTest.php
+// file:   JsonResponderTraitTest.php
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
 namespace Jra\Test\Unit\Controller\Traits;
 
 use Cake\Utility\Hash;
-use Jra\Test\Dummy\Controller\ControllerWithResponderTrait;
+use Jra\Test\Dummy\Controller\ControllerWithJsonResponderTrait;
 use PHPUnit_Framework_TestCase;
 
-class ResponderTraitTest extends PHPUnit_Framework_TestCase
+class JsonResponderTraitTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider provideTestRespondWithData
@@ -24,9 +24,9 @@ class ResponderTraitTest extends PHPUnit_Framework_TestCase
         $response->expects($this->once())->method('statusCode')->with($expectedStatusCode);
         $response->expects($this->once())->method('body')->with($expectedBody);
 
-        $controller = new ControllerWithResponderTrait(null, $response);
+        $controller = new ControllerWithJsonResponderTrait(null, $response);
 
-        $this->assertSame($response, call_user_func_array([$controller, 'respondWith'], $arguments));
+        $this->assertSame($response, call_user_func_array([$controller, 'respondWithJson'], $arguments));
     }
 
     public function provideTestRespondWithData()

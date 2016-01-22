@@ -83,7 +83,16 @@ trait ResourcesTrait
      */
     public function findResources()
     {
-        return $this->getResourcesQuery()->toArray();
+        $query = $this->getResourcesQuery();
+
+        if ($this->hasJraOption('pagination.limit')) {
+            $limit = $this->getJraOption('pagination.limit');
+            $page = $this->request->query('page') === null ? 0 : $this->request->query('page');
+
+            $query = $query->limit($limit)->page($page);
+        }
+
+        return $query->toArray();
     }
 
     /**
@@ -137,6 +146,16 @@ trait ResourcesTrait
         $scope = $this->getResourcesSecureScope();
 
         return empty($scope) ? $query : $query->where($scope);
+    }
+
+    /**
+     * Returns the resource validator.
+     *
+     * @return Cake\Validation\Validator
+     */
+    public function getResourceValidator()
+    {
+        return $this->getResourcesTable()->validator('default');
     }
 
     /**
@@ -196,7 +215,7 @@ trait ResourcesTrait
      */
     public function validateResource(Entity &$resource)
     {
-        $errors = $this->getResourcesTable()->validator('default')->errors($resource->toArray());
+        $errors = $this->getResourceValidator()->errors($resource->toArray());
 
         $resource->errors($errors, null, true);
 

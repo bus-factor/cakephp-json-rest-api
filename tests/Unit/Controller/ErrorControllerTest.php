@@ -31,8 +31,8 @@ class ErrorControllerTest extends PHPUnit_Framework_TestCase
 
         $response = new Response();
 
-        $errorController = $this->getMock('Jra\Controller\ErrorController', ['respondWith']);
-        $errorController->expects($this->once())->method('respondWith')->with(null, $options)->will($this->returnValue($response));
+        $errorController = $this->getMock('Jra\Controller\ErrorController', ['respondWithJson']);
+        $errorController->expects($this->once())->method('respondWithJson')->with(null, $options)->will($this->returnValue($response));
 
         $errorController->viewVars = [
             'error' => $error,

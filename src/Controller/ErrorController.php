@@ -8,7 +8,7 @@ namespace Jra\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\Event;
-use Jra\Controller\Traits\ResponderTrait;
+use Jra\Controller\Traits\JsonResponderTrait;
 
 /**
  * Error controller class.
@@ -17,7 +17,7 @@ use Jra\Controller\Traits\ResponderTrait;
  */
 class ErrorController extends Controller
 {
-    use ResponderTrait;
+    use JsonResponderTrait;
 
     /**
      * Before render hook method.
@@ -26,7 +26,7 @@ class ErrorController extends Controller
      */
     public function beforeRender(Event $event)
     {
-        return $this->respondWith(null, [
+        return $this->respondWithJson(null, [
             'code' => $this->viewVars['error']->getCode(),
             'message' => $this->viewVars['message']
         ]);

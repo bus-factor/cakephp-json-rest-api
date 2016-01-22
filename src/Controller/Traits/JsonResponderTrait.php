@@ -1,6 +1,6 @@
 <?php
 
-// file:   ResponderTrait.php
+// file:   JsonResponderTrait.php
 // date:   2016-01-12
 // author: Michael Leßnau <michael.lessnau@gmail.com>
 
@@ -13,7 +13,7 @@ use Cake\Utility\Hash;
  *
  * @author Michael Leßnau <michael.lessnau@gmail.com>
  */
-trait ResponderTrait
+trait JsonResponderTrait
 {
     /**
      * Responds with JSON formatted data.
@@ -23,7 +23,7 @@ trait ResponderTrait
      *
      * @return Cake\Network\Response
      */
-    public function respondWith($data, array $options = [])
+    public function respondWithJson($data, array $options = [])
     {
         $code = Hash::get($options, 'code', 200);
         $status = ($code < 400) ? 'success' : 'failure';

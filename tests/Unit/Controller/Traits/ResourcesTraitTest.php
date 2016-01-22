@@ -10,6 +10,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\ORM\Entity;
 use Cake\ORM\Query;
 use Cake\ORM\Table;
+use Cake\Validation\Validator;
 use Jra\Test\Dummy\Controller\ControllerWithResourcesTrait;
 use PHPUnit_Framework_TestCase;
 
@@ -129,6 +130,19 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $this->assertSame($query, $controller->getResourcesQuery());
     }
 
+    public function testGetResourceValidator()
+    {
+        $validator = new Validator();
+
+        $table = $this->getTableMock(['validator']);
+        $table->expects($this->once())->method('validator')->with('default')->will($this->returnValue($validator));
+
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
+        $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
+
+        $this->assertSame($validator, $controller->getResourceValidator());
+    }
+
     public function testNewResource()
     {
         $accessibleFields = ['foo' => 'bar'];
@@ -188,11 +202,8 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
         $validator = $this->getMock('Cake\Validation\Validator', ['errors']);
         $validator->expects($this->once())->method('errors')->with($resourceAsArray)->will($this->returnValue($errors));
 
-        $table = $this->getTableMock(['validator']);
-        $table->expects($this->once())->method('validator')->with('default')->will($this->returnValue($validator));
-
-        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesTable']);
-        $controller->expects($this->once())->method('getResourcesTable')->will($this->returnValue($table));
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourceValidator']);
+        $controller->expects($this->once())->method('getResourceValidator')->will($this->returnValue($validator));
 
         $this->assertEquals($errors, $controller->validateResource($resource));
     }
