@@ -52,16 +52,22 @@ class ResourcesTraitTest extends PHPUnit_Framework_TestCase
 
     public function testFindResources()
     {
+        $limit = 1337;
+        $page = 42;
+        $pagination = ['limit' => $limit, 'page' => $page];
+
         $resources = [new Entity(), new Entity()];
         $table = $this->getTableMock();
 
-        $query = $this->getMock('Cake\ORM\Query', ['toArray'], [null, $table]);
-        $query->expects($this->once())->method('toArray')->will($this->returnValue($resources));
+        $query = $this->getMock('Cake\ORM\Query', ['toArray', 'limit', 'page'], [null, $table]);
+        $query->expects($this->at(0))->method('limit')->with($limit)->will($this->returnValue($query));
+        $query->expects($this->at(1))->method('page')->with($page)->will($this->returnValue($query));
+        $query->expects($this->at(2))->method('toArray')->will($this->returnValue($resources));
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithResourcesTrait', ['getResourcesQuery']);
         $controller->expects($this->once())->method('getResourcesQuery')->will($this->returnValue($query));
 
-        $this->assertSame($resources, $controller->findResources());
+        $this->assertSame($resources, $controller->findResources($pagination));
     }
 
     /**

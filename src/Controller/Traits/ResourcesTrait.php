@@ -18,6 +18,9 @@ use RuntimeException;
  * This trait requires the following JSON REST API options:
  *
  *      public $jraOptions = [
+ *          'pagination' => [
+ *              'limit' => 50
+ *          ],
  *          'secure' => [
  *              'user_id' => 'getCurrentUserId'
  *          ],
@@ -79,18 +82,14 @@ trait ResourcesTrait
     /**
      * Finds all resources.
      *
+     * @param array $pagination
+     *
      * @return array
      */
-    public function findResources()
+    public function findResources(array $pagination)
     {
         $query = $this->getResourcesQuery();
-
-        if ($this->hasJraOption('pagination.limit')) {
-            $limit = $this->getJraOption('pagination.limit');
-            $page = $this->request->query('page') === null ? 0 : $this->request->query('page');
-
-            $query = $query->limit($limit)->page($page);
-        }
+        $query = $query->limit($pagination['limit'])->page($pagination['page']);
 
         return $query->toArray();
     }

@@ -65,9 +65,14 @@ trait CrudOperationsTrait
      */
     public function index()
     {
-        $resources = $this->findResources();
+        $pagination = [
+            'limit' => $this->hasJraOption('pagination.limit') ? $this->getJraOption('pagination.limit') : 50,
+            'page' => ($this->request->query('page') === null) ? 0 : $this->request->query('page')
+        ];
 
-        return $this->respondWithJson($resources);
+        $resources = $this->findResources($pagination);
+
+        return $this->respondWithJson($resources, ['pagination' => $pagination]);
     }
 
     /**

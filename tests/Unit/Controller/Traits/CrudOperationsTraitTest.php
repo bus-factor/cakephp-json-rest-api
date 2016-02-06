@@ -146,10 +146,33 @@ class CrudOperationsTraitTest extends PHPUnit_Framework_TestCase
     {
         $response = new Response();
         $resources = [new Entity(), new Entity()];
+        $pagination = ['limit' => 50, 'page' => 0];
+        $options = ['pagination' => $pagination];
 
         $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithCrudOperationsTrait', ['findResources', 'respondWithJson']);
         $controller->expects($this->once())->method('findResources')->will($this->returnValue($resources));
-        $controller->expects($this->once())->method('respondWithJson')->with($resources)->will($this->returnValue($response));
+        $controller->expects($this->once())->method('respondWithJson')->with($resources, $options)->will($this->returnValue($response));
+
+        $this->assertSame($response, $controller->index());
+    }
+
+    public function testIndexWithPagination()
+    {
+        $limit = 1337;
+        $page = 42;
+
+        $response = new Response();
+        $resources = [new Entity(), new Entity()];
+        $pagination = ['limit' => $limit, 'page' => $page];
+        $options = ['pagination' => $pagination];
+
+        $request = $this->getMock('Cake\Network\Request', ['query']);
+        $request->expects($this->any())->method('query')->with('page')->will($this->returnValue($page));
+
+        $controller = $this->getMock('Jra\Test\Dummy\Controller\ControllerWithCrudOperationsTrait', ['findResources', 'respondWithJson'], [$request, $response]);
+        $controller->expects($this->once())->method('findResources')->will($this->returnValue($resources));
+        $controller->expects($this->once())->method('respondWithJson')->with($resources, $options)->will($this->returnValue($response));
+        $controller->setJraOption('pagination.limit', $limit);
 
         $this->assertSame($response, $controller->index());
     }

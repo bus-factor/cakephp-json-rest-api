@@ -13,9 +13,9 @@ use PHPUnit_Framework_TestCase;
 class JsonResponderTraitTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @dataProvider provideTestRespondWithData
+     * @dataProvider provideTestRespondWithJsonData
      */
-    public function testRespondWith($arguments, $expectedBody)
+    public function testRespondWithJson($arguments, $expectedBody)
     {
         $expectedStatusCode = Hash::get($arguments, [1, 'code'], 200);
 
@@ -29,7 +29,7 @@ class JsonResponderTraitTest extends PHPUnit_Framework_TestCase
         $this->assertSame($response, call_user_func_array([$controller, 'respondWithJson'], $arguments));
     }
 
-    public function provideTestRespondWithData()
+    public function provideTestRespondWithJsonData()
     {
         return [[
             ['foo'],
@@ -46,6 +46,9 @@ class JsonResponderTraitTest extends PHPUnit_Framework_TestCase
         ],[
             ['foo', ['code' => 500, 'message' => 'Some error.']],
             '{"status":"failure","code":500,"errors":"foo","message":"Some error."}'
+        ],[
+            ['foo', ['code' => 500, 'message' => 'Some error.', 'pagination' => ['limit' => 1337, 'page' => 42]]],
+            '{"status":"failure","code":500,"errors":"foo","message":"Some error.","pagination":{"limit":1337,"page":42}}'
         ]];
     }
 }

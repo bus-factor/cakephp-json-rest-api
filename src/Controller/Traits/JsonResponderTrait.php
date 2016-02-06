@@ -25,17 +25,24 @@ trait JsonResponderTrait
      */
     public function respondWithJson($data, array $options = [])
     {
+        $reservedKeys = ['code', 'status', 'message', 'data', 'errors'];
+
         $code = Hash::get($options, 'code', 200);
         $status = ($code < 400) ? 'success' : 'failure';
         $message = Hash::get($options, 'message', null);
         $dataField = ($status === 'success') ? 'data' : 'errors';
 
-        $json = json_encode([
-            'status' => $status,
-            'code' => $code,
-            $dataField => $data,
-            'message' => $message
-        ]);
+        $json = json_encode(
+            array_merge(
+                [
+                    'status' => $status,
+                    'code' => $code,
+                    $dataField => $data,
+                    'message' => $message
+                ],
+                array_diff_key($options, array_flip($reservedKeys))
+            )
+        );
 
         $this->response->type('json');
         $this->response->statusCode($code);
