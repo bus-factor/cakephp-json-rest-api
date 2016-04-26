@@ -67,7 +67,7 @@ trait CrudOperationsTrait
     {
         $pagination = [
             'limit' => $this->hasJraOption('pagination.limit') ? $this->getJraOption('pagination.limit') : 50,
-            'page' => ($this->request->query('page') === null) ? 0 : $this->request->query('page')
+            'page' => ($this->request->query('page') === null) ? 1 : $this->request->query('page')
         ];
 
         $resources = $this->findResources($pagination);
